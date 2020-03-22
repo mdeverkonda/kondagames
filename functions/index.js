@@ -37,8 +37,44 @@ async function getData() {
     }
 }
 
+async function getCandB(word) {
+    
+    try {
+        
+        console.log(word);
+        
+        var cows = 2
+        var bulls = 1
 
-app.get('/', async (request, response) => {
+        let result = "2C, 1B"
+
+        return result
+    }catch(exception) {
+        console.warn(exception)
+        return null
+    }
+}
+
+app.get('/rest/word', async (request, response) => {
+    try {
+        response.set('Cache-Control', 'public, max-age=300, s-maxage=600')
+        let reqWord = request.param("word")
+
+        console.log("&&&&&&&&&&&&&&", reqWord)
+
+        const wordResult = await getCandB(reqWord)
+        //console.log(words)
+        //response.render('word-result', { wordResult })
+        response.json({"result": wordResult})
+        return null
+    } catch(exception){
+        console.warn(exception)
+        return response.render(exception);
+    }
+});
+
+
+app.get('/rest', async (request, response) => {
     try {
         response.set('Cache-Control', 'public, max-age=300, s-maxage=600')
         const words = await getData()
