@@ -29,55 +29,120 @@ const firebaseApp = firebase.initializeApp({
 
 async function getData() {
     const db = firebaseApp.database().ref('/')
-    
+
     try {
         return await db.once('value').then(snap => snap.val())
-    }catch(exception) {
+    } catch (exception) {
         console.warn(exception)
         return null
     }
 }
 
+async function getDataMap() {
+    const words = await getData()
+    //response.render('index', { words })
+
+    const mp = new Map()
+
+    for (let i = 0; i < words.length; i++) {
+        obj = words[i]
+        Object.keys(obj).forEach(key => {
+            mp.set(key, obj[key]);
+        });
+    }
+
+    return mp
+}
+
 async function getCandB(word) {
-    
+
     try {
-        
+
         console.log(word);
-        
+
         var cows = 2
         var bulls = 1
 
         let result = "2C, 1B"
 
-        return result
-    }catch(exception) {
+        //return result
+        return word
+    } catch (exception) {
         console.warn(exception)
         return null
     }
 }
 
+function getRandomInt(max) {
+    return Math.floor(Math.random() * Math.floor(max));
+  }
+
+async function getRandomWord() {
+
+    try {
+
+        randomNum = getRandomInt(29)
+        const wordMap = await getDataMap()
+        const key = "word-".concat(randomNum)
+        return wordMap.get(key)
+        
+    } catch (exception) {
+        console.warn(exception)
+        return null
+    }
+}
+
+
+
+
+// REST Methods 
+
+app.get('/cnb/random_word', async (request, response) => {
+    try {
+        console.log("Pick Random Word")
+
+        const wordResult = await getRandomWord()
+
+        response.json({ "game-word": wordResult })
+        return null
+    }
+    catch (exception) {
+        console.warn(exception)
+        return response.json(exception);
+    }
+
+
+});
+
+
+
 app.post('/cnb/word/', async (request, response) => {
-    var word = request.body.word
-    
-    console.log("Req Param - word: ", word)
+    try {
+        var word = request.body.word
+        console.log("Req Param - word: ", word)
+        const wordResult = await getCandB(word)
+        response.json({ "result": wordResult })
+        return null
+    }
+    catch (exception) {
+        console.warn(exception)
+        return response.json(exception);
+    }
 
-    const wordResult = await getCandB(word)
-
-    response.json({"result": wordResult})
-    return null
 
 });
 
 
 app.get('/cnb/allwords/', async (request, response) => {
     try {
-        response.set('Cache-Control', 'public, max-age=300, s-maxage=600')
+        //response.set('Cache-Control', 'public, max-age=300, s-maxage=600')
+
         const words = await getData()
-        //console.log(words)
-        //response.render('index', { words })
+    
         response.json(words)
         return null
-    } catch(exception){
+    }
+    catch (exception) {
         console.warn(exception)
         return response.render(exception);
     }
@@ -85,25 +150,3 @@ app.get('/cnb/allwords/', async (request, response) => {
 
 
 exports.app = functions.https.onRequest(app);
-
-
-
-// app.get('/cnb/word', async (request, response) => {
-//     try {
-//         response.set('Cache-Control', 'public, max-age=300, s-maxage=600')
-//         let reqWord = request.param("word")
-
-//         console.log("Req Param - word: ", reqWord)
-
-//         const wordResult = await getCandB(reqWord)
-//         //console.log(words)
-//         //response.render('word-result', { wordResult })
-//         response.json({"result": wordResult})
-//         return null
-//     } catch(exception){
-//         console.warn(exception)
-//         return response.render(exception);
-//     }
-// });
-
-
