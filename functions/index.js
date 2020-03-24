@@ -104,7 +104,7 @@ async function getGameWord() {
 
         console.log("calling game word")
 
-        if (gameInProgress == false ) {
+        if (gameInProgress === false ) {
             gameWord = await getRandomWord()
             console.log("Game Word is : ", gameWord)
             gameInProgress = true
@@ -161,7 +161,7 @@ app.post('/cnb/word/', async (request, response) => {
         session = request.session
         gameInProgress = session.gameInProgress
         
-        if (gameInProgress == true){
+        if (gameInProgress === true){
             gameWord = session.gameWord
             console.log("Req Param - word: ", word)
             //const wordResult = await getCandB(word)
@@ -174,8 +174,8 @@ app.post('/cnb/word/', async (request, response) => {
                 wordChar = word.charAt(i)
                 for(var k=0; k < gameWord.length;k++ ) {
                     gameChar = gameWord.charAt(k)
-                    if(wordChar == gameChar) {
-                        if (k == i) {
+                    if(wordChar === gameChar) {
+                        if (k === i) {
                             bullCount++
                         }
                         else {
