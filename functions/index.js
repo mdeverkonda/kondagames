@@ -1,13 +1,16 @@
 const functions = require('firebase-functions');
 const express = require('express');
+var session = require("express-session")
 const engines = require('consolidate')
 const firebase = require('firebase-admin')
 
-var bodyParser = require('body-parser')
-var jsonParser = bodyParser.json()
+const bodyParser = require('body-parser')
+const jsonParser = bodyParser.json()
 //var urlencodedParser = bodyParser.urlencoded({ extended: false })
 
 
+global.gameWord = ""
+global.gameInProgress = false
 
 const app = express();
 //app.engine('hbs', engines.handlebars)
@@ -18,6 +21,9 @@ app.use(bodyParser.json())
 app.use(bodyParser.urlencoded({ extended: true }))
 app.use(bodyParser.json({ type: 'application/*+json' }))
 
+app.use(session({resave: true, saveUninitialized: true, secret: 'cnb', cookie: { maxAge: 120000 }}));
+
+
 var serviceAccount = require("./kondagamesServiceAccountKey.json");
 
 const firebaseApp = firebase.initializeApp({
@@ -25,7 +31,6 @@ const firebaseApp = firebase.initializeApp({
     databaseURL: "https://kondagames.firebaseio.com/"
 })
 
-//var words = []
 
 async function getData() {
     const db = firebaseApp.database().ref('/')
@@ -84,24 +89,58 @@ async function getRandomWord() {
         randomNum = getRandomInt(29)
         const wordMap = await getDataMap()
         const key = "word-".concat(randomNum)
-        return wordMap.get(key)
-        
+        const word = wordMap.get(key)
+        console.log("Random Word is: ", word)
+        return word
+
     } catch (exception) {
         console.warn(exception)
         return null
     }
 }
 
+async function getGameWord() {
+    try {
 
+        console.log("calling game word")
+
+        if (gameInProgress == false ) {
+            gameWord = await getRandomWord()
+            console.log("Game Word is : ", gameWord)
+            gameInProgress = true
+            session.gameInProgress = gameInProgress
+            session.gameWord = gameWord
+            return gameWord
+        }
+        else {
+            console.log("Game Word is : ", gameWord)
+            return "Game in Progress"
+        }
+
+    }
+    catch (exception) {
+        console.warn(exception)
+        return null
+    }
+}
 
 
 // REST Methods 
 
-app.get('/cnb/random_word', async (request, response) => {
+app.get('/cnb/game_word', async (request, response) => {
     try {
-        console.log("Pick Random Word")
+        
+        session = request.session
+        try {
+            gameInProgress = Boolean(session.gameInProgress)
+            console.log(gameInProgress)
+        }
+        catch (exception) {
+            console.warn(exception)
+            gameInProgress = false
+        }
 
-        const wordResult = await getRandomWord()
+        const wordResult = await getGameWord()
 
         response.json({ "game-word": wordResult })
         return null
