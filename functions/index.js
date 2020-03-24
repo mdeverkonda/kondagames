@@ -159,12 +159,45 @@ app.post('/cnb/word/', async (request, response) => {
     try {
         var word = request.body.word
         session = request.session
+        gameInProgress = session.gameInProgress
+        
         if (gameInProgress == true){
             gameWord = session.gameWord
             console.log("Req Param - word: ", word)
             //const wordResult = await getCandB(word)
             console.log("Game Word is: ", gameWord)
-            response.json({ "result": "1C, 2B" })
+
+            cowCount = 0
+            bullCount = 0
+
+            for (var i = 0; i < word.length; i++) {
+                wordChar = word.charAt(i)
+                for(var k=0; k < gameWord.length;k++ ) {
+                    gameChar = gameWord.charAt(k)
+                    if(wordChar == gameChar) {
+                        if (k == i) {
+                            bullCount++
+                        }
+                        else {
+                            cowCount++
+                        }
+                    }
+                }
+            }
+
+            console.log("bullCount: ", bullCount)
+            console.log("cowCount: ", cowCount)
+
+            if (bullCount < 4) {
+                result = bullCount + " Bs and " + cowCount + " Cs"
+                response.json({ "result": result })
+            }
+            else {
+                result = "You got it. Its the game"
+                session.gameWord = ""
+                session.gameInProgress = false
+                response.json({ "result": result })
+            }
         }
         else {
             response.json("Game Not Started")
