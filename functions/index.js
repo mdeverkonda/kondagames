@@ -59,25 +59,6 @@ async function getDataMap() {
     return mp
 }
 
-async function getCandB(word) {
-
-    try {
-
-        console.log(word);
-
-        var cows = 2
-        var bulls = 1
-
-        let result = "2C, 1B"
-
-        //return result
-        return word
-    } catch (exception) {
-        console.warn(exception)
-        return null
-    }
-}
-
 function getRandomInt(max) {
     return Math.floor(Math.random() * Math.floor(max));
   }
@@ -106,7 +87,7 @@ async function getGameWord() {
 
         if (gameInProgress === false ) {
             gameWord = await getRandomWord()
-            console.log("Game Word is : ", gameWord)
+            console.log("Game Word is selected. Start Playing")
             gameInProgress = true
             session.gameInProgress = gameInProgress
             session.gameWord = gameWord
@@ -142,7 +123,7 @@ app.get('/cnb/game_word', async (request, response) => {
 
         const wordResult = await getGameWord()
 
-        response.json({ "game-word": wordResult })
+        response.json("Game Word is selected. Start Playing")
         return null
     }
     catch (exception) {
@@ -155,7 +136,7 @@ app.get('/cnb/game_word', async (request, response) => {
 
 
 
-app.post('/cnb/word/', async (request, response) => {
+app.post('/cnb/player_word/', async (request, response) => {
     try {
         var word = request.body.word
         session = request.session
@@ -163,9 +144,8 @@ app.post('/cnb/word/', async (request, response) => {
         
         if (gameInProgress === true){
             gameWord = session.gameWord
-            console.log("Req Param - word: ", word)
-            //const wordResult = await getCandB(word)
-            console.log("Game Word is: ", gameWord)
+            // console.log("Req Param - word: ", word)
+            // console.log("Game Word is: ", gameWord)
 
             cowCount = 0
             bullCount = 0
@@ -185,8 +165,8 @@ app.post('/cnb/word/', async (request, response) => {
                 }
             }
 
-            console.log("bullCount: ", bullCount)
-            console.log("cowCount: ", cowCount)
+            // console.log("bullCount: ", bullCount)
+            // console.log("cowCount: ", cowCount)
 
             if (bullCount < 4) {
                 result = bullCount + " Bs and " + cowCount + " Cs"
@@ -212,21 +192,19 @@ app.post('/cnb/word/', async (request, response) => {
 
 });
 
-
 app.get('/cnb/allwords/', async (request, response) => {
-    try {
-        //response.set('Cache-Control', 'public, max-age=300, s-maxage=600')
+    // try {
+    //     const words = await getData()
+    //     response.json(words)
+    //     return null
+    // }
+    // catch (exception) {
+    //     console.warn(exception)
+    //     return response.render(exception);
+    // }
 
-        const words = await getData()
-    
-        response.json(words)
-        return null
-    }
-    catch (exception) {
-        console.warn(exception)
-        return response.render(exception);
-    }
+    response.json("Just Play the Game")
+
 });
-
 
 exports.app = functions.https.onRequest(app);
